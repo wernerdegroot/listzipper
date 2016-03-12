@@ -65,8 +65,12 @@ toList z = before z ++ [get z] ++ after z
 
 {-| Update all elements before the element the `Zipper` is focussed on. -}
 updateBefore : (List a -> List a) -> Zipper a -> Zipper a
-updateBefore f (Zipper ls x rs) =
-  Zipper (f ls) x rs
+updateBefore f ((Zipper _ x rs) as zipper) =
+  let
+    elementsBefore = before zipper
+    updatedElementsBefore = f elementsBefore
+  in
+    Zipper (reverse updatedElementsBefore) x rs
     
 {-| Updat the element the `Zipper` is focussed on. -}
 update : (a -> a) -> Zipper a -> Zipper a
@@ -83,7 +87,7 @@ first : Zipper a -> Zipper a
 first ((Zipper ls x rs) as zipper) =
   case reverse ls of
     [] -> zipper
-    y :: ys -> Zipper [] y (ys ++ rs)
+    y :: ys -> Zipper [] y (ys ++ [x] ++ rs)
     
 {-| Move the focus to the element before the element the `Zipper` is currently focussed on (if there is such an element). -}
 previous : Zipper a -> Maybe (Zipper a)
@@ -97,14 +101,14 @@ next : Zipper a -> Maybe (Zipper a)
 next (Zipper ls x rs) =
   case rs of
     [] -> Nothing
-    y :: ys -> Just <| Zipper (x :: rs) y ys
+    y :: ys -> Just <| Zipper (x :: ls) y ys
     
 {-| Move the focus to the last element of the list. -}
 last : Zipper a -> Zipper a
 last ((Zipper ls x rs) as zipper) =
   case reverse rs of
     [] -> zipper
-    y :: ys -> Zipper (ys ++ ls) y [] 
+    y :: ys -> Zipper (ys ++ [x] ++ ls) y [] 
     
 find' : (a -> Bool) -> Zipper a -> Trampoline (Maybe (Zipper a))
 find' predicate ((Zipper ls x rs) as zipper) =
