@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "summary": "A zipper for List",
+    "repository": "https://github.com/wernerdegroot/ListZipper.git",
+    "license": "MIT",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": [
+        "List.Zipper"
+    ],
+    "dependencies": {
+        "elm-lang/core": "3.0.0 <= v < 4.0.0"
+    },
+    "elm-version": "0.16.0 <= v < 0.17.0"
+}
