@@ -1,4 +1,4 @@
-module List.ZipperTest where
+module List.Zipper.Tests where
 
 import ElmTest exposing (..)
 import Debug exposing (crash)
@@ -142,7 +142,7 @@ searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheSt
   in
     test "Searching for the number 1 should yield `Nothing` when the number 1 does not occur after the starting point" <| assertEqual Nothing zipper
 
-zipperTest = suite "List.Zipper" 
+zipperTests = suite "List.Zipper" 
   [ creatingAZipperFromAnEmptyListShouldReturnNothing
   , creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement 
   , movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement
