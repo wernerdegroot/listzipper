@@ -72,7 +72,7 @@ updateBefore f ((Zipper _ x rs) as zipper) =
   in
     Zipper (reverse updatedElementsBefore) x rs
     
-{-| Updat the element the `Zipper` is focussed on. -}
+{-| Update the element the `Zipper` is focussed on. -}
 update : (a -> a) -> Zipper a -> Zipper a
 update f (Zipper ls x rs) = 
   Zipper ls (f x) rs
