@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "A zipper for List",
-    "repository": "https://github.com/wernerdegroot/ListZipper.git",
+    "repository": "https://github.com/wernerdegroot/listzipper.git",
     "license": "MIT",
     "source-directories": [
         "."
