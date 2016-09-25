@@ -1,4 +1,4 @@
-module List.Zipper.Tests where
+module List.Zipper.Tests exposing (..)
 
 import ElmTest exposing (..)
 import Debug exposing (crash)
