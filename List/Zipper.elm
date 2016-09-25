@@ -1,4 +1,4 @@
-module List.Zipper 
+module List.Zipper exposing
   ( Zipper(..)
   , fromList
   , before
@@ -13,7 +13,7 @@ module List.Zipper
   , next
   , last
   , find
-  ) where
+  )
 
 {-| A zipper for `List`.
 
@@ -35,7 +35,6 @@ module List.Zipper
 -}
 
 import List exposing (reverse)
-import Trampoline exposing (Trampoline(..), trampoline)
 
 {-| The `Zipper` type. -}
 type Zipper a = Zipper (List a) a (List a)
@@ -110,18 +109,15 @@ last ((Zipper ls x rs) as zipper) =
     [] -> zipper
     y :: ys -> Zipper (ys ++ [x] ++ ls) y [] 
     
-find' : (a -> Bool) -> Zipper a -> Trampoline (Maybe (Zipper a))
-find' predicate ((Zipper ls x rs) as zipper) =
+{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from a given `Zipper`). -}
+find : (a -> Bool) -> Zipper a -> Maybe (Zipper a)
+find predicate ((Zipper ls x rs) as zipper) =
   if predicate x then
-    Done (Just zipper)
+    Just zipper
   else
     case next zipper of
       Just nextZipper ->
-        Continue <| \_ -> find' predicate nextZipper
+        find predicate nextZipper
         
       Nothing ->
-        Done Nothing
-
-{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from a given `Zipper`). -}
-find : (a -> Bool) -> Zipper a -> Maybe (Zipper a)
-find predicate zipper = find' predicate zipper |> trampoline
+        Nothing
