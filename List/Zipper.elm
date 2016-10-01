@@ -4,7 +4,7 @@ module List.Zipper exposing
   , fromList
   , withDefault
   , before
-  , get
+  , current
   , after
   , toList
   , updateBefore
@@ -26,7 +26,7 @@ module List.Zipper exposing
 @docs singleton, fromList, withDefault
 
 # Accessors
-@docs before, get, after, toList
+@docs before, current, after, toList
 
 # Updating
 @docs updateBefore, update, updateAfter
@@ -60,9 +60,9 @@ withDefault x = Maybe.withDefault (singleton x)
 before : Zipper a -> List a
 before (Zipper ls _ _) = reverse ls
 
-{-| Returns the element the `Zipper` is focussed on. -}
-get : Zipper a -> a
-get (Zipper _ x _) = x
+{-| Returns the element the `Zipper` is currently focussed on. -}
+current : Zipper a -> a
+current (Zipper _ x _) = x
 
 {-| Returns all elements after the element the `Zipper` is focussed on -}
 after : Zipper a -> List a
@@ -70,7 +70,7 @@ after (Zipper _ _ rs) = rs
 
 {-| Reconstruct the list. -}
 toList : Zipper a -> List a
-toList z = before z ++ [get z] ++ after z
+toList z = before z ++ [current z] ++ after z
 
 {-| Update all elements before the element the `Zipper` is focussed on. -}
 updateBefore : (List a -> List a) -> Zipper a -> Zipper a
