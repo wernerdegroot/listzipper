@@ -1,8 +1,10 @@
 module List.Zipper exposing
   ( Zipper(..)
+  , singleton
   , fromList
+  , withDefault
   , before
-  , get
+  , current
   , after
   , toList
   , updateBefore
@@ -21,10 +23,10 @@ module List.Zipper exposing
 @docs Zipper
 
 # Constructing a `Zipper`
-@docs fromList
+@docs singleton, fromList, withDefault
 
 # Accessors
-@docs before, get, after, toList
+@docs before, current, after, toList
 
 # Updating
 @docs updateBefore, update, updateAfter
@@ -39,6 +41,10 @@ import List exposing (reverse)
 {-| The `Zipper` type. -}
 type Zipper a = Zipper (List a) a (List a)
 
+{-| Construct a `Zipper` focussed on the first element of a singleton list. -}
+singleton : a -> Zipper a
+singleton x = Zipper [] x []
+
 {-| Construct a `Zipper` from a list. The `Zipper` will focus on the first element (if there is a first element). -}
 fromList : List a -> Maybe (Zipper a)
 fromList xs = 
@@ -46,13 +52,17 @@ fromList xs =
     [] -> Nothing
     y :: ys -> Just (Zipper [] y ys)
 
+{-| Provide an alternative when constructing a `Zipper` fails. -}
+withDefault : a -> Maybe (Zipper a) -> Zipper a
+withDefault x = Maybe.withDefault (singleton x)
+
 {-| Returns all elements before the element the `Zipper` is focussed on. -}
 before : Zipper a -> List a
 before (Zipper ls _ _) = reverse ls
 
-{-| Returns the element the `Zipper` is focussed on. -}
-get : Zipper a -> a
-get (Zipper _ x _) = x
+{-| Returns the element the `Zipper` is currently focussed on. -}
+current : Zipper a -> a
+current (Zipper _ x _) = x
 
 {-| Returns all elements after the element the `Zipper` is focussed on -}
 after : Zipper a -> List a
@@ -60,7 +70,7 @@ after (Zipper _ _ rs) = rs
 
 {-| Reconstruct the list. -}
 toList : Zipper a -> List a
-toList z = before z ++ [get z] ++ after z
+toList z = before z ++ [current z] ++ after z
 
 {-| Update all elements before the element the `Zipper` is focussed on. -}
 updateBefore : (List a -> List a) -> Zipper a -> Zipper a
@@ -71,7 +81,7 @@ updateBefore f ((Zipper _ x rs) as zipper) =
   in
     Zipper (reverse updatedElementsBefore) x rs
     
-{-| Updat the element the `Zipper` is focussed on. -}
+{-| Update the element the `Zipper` is focussed on. -}
 update : (a -> a) -> Zipper a -> Zipper a
 update f (Zipper ls x rs) = 
   Zipper ls (f x) rs

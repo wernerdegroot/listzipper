@@ -27,7 +27,7 @@ updatedList = someList
   |> flatMap next
   |> flatMap next
   |> map (update negative)
-  |> toList
+  |> map toList
 ```
 
 ### Finding values
@@ -51,6 +51,6 @@ updatedList = someList
   |> fromList
   |> flatMap (find even)
   |> map (update negative)
-  |> toList
+  |> map toList
 
 ```
