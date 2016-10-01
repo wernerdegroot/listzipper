@@ -1,11 +1,10 @@
-module Tests where
+module Tests exposing (..)
 
 import ElmTest exposing (..)
-import Graphics.Element exposing (Element, show)
 import List.Zipper.Tests exposing (zipperTests)
 
 tests = suite "Tests" [ zipperTests ]
 
-main : Element
+main : Program Never
 main = 
-    elementRunner tests
+    runSuiteHtml tests
