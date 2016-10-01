@@ -3,7 +3,7 @@ module List.Zipper.Tests exposing (..)
 import ElmTest exposing (..)
 import Debug exposing (crash)
 import List.Zipper exposing (..)
-import Maybe exposing (andThen, map, withDefault)
+import Maybe exposing (andThen, map)
 
 -- Convenience functions:
 flatMap : (a -> Maybe b) -> Maybe a -> Maybe b
@@ -24,6 +24,19 @@ focusOnThirdElement = someList
   |> flatMap next
   
 -- Tests:
+creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement =
+  let
+    zipper = singleton 1
+    valuesBefore = before zipper
+    valueAtFocus = get zipper
+    valuesAfter = after zipper
+  in
+    suite "Creating a singleton should result in a `Zipper` with only one element"
+      [ test "Elements before focus" <| assertEqual [] valuesBefore
+      , test "Element at focus" <| assertEqual 1 valueAtFocus
+      , test "Elements after focus" <| assertEqual [] valuesAfter
+      ]
+
 creatingAZipperFromAnEmptyListShouldReturnNothing =
   let
     zipperFromEmptyList = fromList []
@@ -41,6 +54,34 @@ creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement =
       [ test "Elements before focus" <| assertJust [] valuesBefore
       , test "Element at focus" <| assertJust 1 valueAtFocus
       , test "Elements after focus" <| assertJust [2, 3, 4] valuesAfter 
+      ]
+
+providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative =
+  let
+    zipper = fromList []
+    zipperOrAlternative = withDefault 1 zipper
+    valuesBefore = before zipperOrAlternative
+    valueAtFocus = get zipperOrAlternative
+    valuesAfter = after zipperOrAlternative
+  in
+    suite "Providing an alternative to a `Zipper` constructed from an empty list should yield a singleton with the provided alternative"
+      [ test "Elements before focus" <| assertEqual [] valuesBefore
+      , test "Element at focus" <| assertEqual 1 valueAtFocus
+      , test "Elements after focus" <| assertEqual [] valuesAfter
+      ]
+
+providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList =
+  let
+    zipper = fromList someList
+    zipperOrAlternative = withDefault 1 zipper
+    valuesBefore = before zipperOrAlternative
+    valueAtFocus = get zipperOrAlternative
+    valuesAfter = after zipperOrAlternative
+  in
+    suite "Providing an alternative to a `Zipper` constructed from a valid list should yield a `Zipper` focussed on the first element of the list"
+      [ test "Elements before focus" <| assertEqual [] valuesBefore
+      , test "Element at focus" <| assertEqual 1 valueAtFocus
+      , test "Elements after focus" <| assertEqual [2, 3, 4] valuesAfter 
       ]
       
 movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement =
@@ -143,8 +184,11 @@ searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheSt
     test "Searching for the number 1 should yield `Nothing` when the number 1 does not occur after the starting point" <| assertEqual Nothing zipper
 
 zipperTests = suite "List.Zipper" 
-  [ creatingAZipperFromAnEmptyListShouldReturnNothing
-  , creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement 
+  [ creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement
+  , creatingAZipperFromAnEmptyListShouldReturnNothing
+  , creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement
+  , providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative
+  , providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList 
   , movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement
   , movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement
   , movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement

@@ -1,6 +1,8 @@
 module List.Zipper exposing
   ( Zipper(..)
+  , singleton
   , fromList
+  , withDefault
   , before
   , get
   , after
@@ -21,7 +23,7 @@ module List.Zipper exposing
 @docs Zipper
 
 # Constructing a `Zipper`
-@docs fromList
+@docs singleton, fromList, withDefault
 
 # Accessors
 @docs before, get, after, toList
@@ -39,12 +41,20 @@ import List exposing (reverse)
 {-| The `Zipper` type. -}
 type Zipper a = Zipper (List a) a (List a)
 
+{-| Construct a `Zipper` focussed on the first element of a singleton list. -}
+singleton : a -> Zipper a
+singleton x = Zipper [] x []
+
 {-| Construct a `Zipper` from a list. The `Zipper` will focus on the first element (if there is a first element). -}
 fromList : List a -> Maybe (Zipper a)
 fromList xs = 
   case xs of
     [] -> Nothing
     y :: ys -> Just (Zipper [] y ys)
+
+{-| Provide an alternative when constructing a `Zipper` fails. -}
+withDefault : a -> Maybe (Zipper a) -> Zipper a
+withDefault x = Maybe.withDefault (singleton x)
 
 {-| Returns all elements before the element the `Zipper` is focussed on. -}
 before : Zipper a -> List a
