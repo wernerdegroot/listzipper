@@ -11,6 +11,7 @@ all =
     describe "List.Zipper"
         [ constructing
         , accessors
+        , updating
         ]
 
 
@@ -67,6 +68,37 @@ accessors =
                     Expect.equal ((List.reverse b) ++ [ f ] ++ a) <| toList z
             ]
         ]
+
+
+updating : Test
+updating =
+    let
+        negtive =
+            (*) -1
+
+        negtiveAll =
+            List.map negtive
+    in
+        describe "updating"
+            [ describe "#updateBefore"
+                [ fuzzZipper "should update all elements before the focussed element" <|
+                    \z b f a ->
+                        updateBefore negtiveAll z
+                            |> Expect.equal (Zipper (negtiveAll b) f a)
+                ]
+            , describe "#update"
+                [ fuzzZipper "should update the focussed element" <|
+                    \z b f a ->
+                        update negtive z
+                            |> Expect.equal (Zipper b (negtive f) a)
+                ]
+            , describe "#updateAfter"
+                [ fuzzZipper "should update all elements after the focussed element" <|
+                    \z b f a ->
+                        updateAfter negtiveAll z
+                            |> Expect.equal (Zipper b f (negtiveAll a))
+                ]
+            ]
 
 
 fuzzZipper : String -> (Zipper Int -> List Int -> Int -> List Int -> Expect.Expectation) -> Test
