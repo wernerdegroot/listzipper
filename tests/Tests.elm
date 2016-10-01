@@ -21,7 +21,7 @@ constructing =
         [ describe "#singleton"
             [ fuzz int "should result in a zipper focussed on the only element" <|
                 \i ->
-                    Expect.equal (Zipper [] i []) <| singleton i
+                    expectZipper [] i [] <| singleton i
             ]
         , describe "#fromLIst"
             [ fuzz (list int) "should maybe return a zipper" <|
@@ -39,7 +39,7 @@ constructing =
                 \() ->
                     fromList []
                         |> withDefault 42
-                        |> Expect.equal (Zipper [] 42 [])
+                        |> expectZipper [] 42 []
             ]
         ]
 
@@ -84,21 +84,27 @@ updating =
                 [ fuzzZipper "should update all elements before the focussed element" <|
                     \z b f a ->
                         updateBefore negtiveAll z
-                            |> Expect.equal (Zipper (negtiveAll b) f a)
+                            |> expectZipper (negtiveAll b) f a
                 ]
             , describe "#update"
                 [ fuzzZipper "should update the focussed element" <|
                     \z b f a ->
                         update negtive z
-                            |> Expect.equal (Zipper b (negtive f) a)
+                            |> expectZipper b (negtive f) a
                 ]
             , describe "#updateAfter"
                 [ fuzzZipper "should update all elements after the focussed element" <|
                     \z b f a ->
                         updateAfter negtiveAll z
-                            |> Expect.equal (Zipper b f (negtiveAll a))
+                            |> expectZipper b f (negtiveAll a)
                 ]
             ]
+
+
+expectZipper : List a -> a -> List a -> Zipper a -> Expect.Expectation
+expectZipper b f a z =
+    Zipper b f a
+        |> Expect.equal z
 
 
 fuzzZipper : String -> (Zipper Int -> List Int -> Int -> List Int -> Expect.Expectation) -> Test
