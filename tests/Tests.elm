@@ -12,6 +12,7 @@ all =
         [ constructing
         , accessors
         , updating
+        , moving
         ]
 
 
@@ -99,6 +100,48 @@ updating =
                             |> expectZipper b f (negtiveAll a)
                 ]
             ]
+
+
+moving : Test
+moving =
+    describe "moving"
+        [ describe "#next"
+            [ fuzzZipper "should set the focus to the next item" <|
+                \z b f a ->
+                    next z
+                        |> Maybe.map current
+                        |> Expect.equal (List.head a)
+            ]
+        , describe "#previous"
+            [ fuzzZipper "should set the focus to the previous item" <|
+                \z b f a ->
+                    previous z
+                        |> Maybe.map current
+                        |> Expect.equal (List.head b)
+            ]
+        , describe "#first"
+            [ fuzzZipper "should set the focus to the first item" <|
+                \z b f a ->
+                    if List.isEmpty b then
+                        Expect.equal f <| current <| first z
+                    else
+                        first z
+                            |> current
+                            |> Just
+                            |> Expect.equal (List.head <| List.reverse b)
+            ]
+        , describe "#last"
+            [ fuzzZipper "should set the focus to the last item" <|
+                \z b f a ->
+                    if List.isEmpty a then
+                        Expect.equal f <| current <| last z
+                    else
+                        last z
+                            |> current
+                            |> Just
+                            |> Expect.equal (List.head <| List.reverse a)
+            ]
+        ]
 
 
 expectZipper : List a -> a -> List a -> Zipper a -> Expect.Expectation
