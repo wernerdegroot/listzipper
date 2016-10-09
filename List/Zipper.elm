@@ -7,9 +7,10 @@ module List.Zipper exposing
   , current
   , after
   , toList
-  , updateBefore
-  , update
-  , updateAfter
+  , map
+  , mapBefore
+  , mapCurrent
+  , mapAfter
   , first
   , previous
   , next
@@ -28,8 +29,8 @@ module List.Zipper exposing
 # Accessors
 @docs before, current, after, toList
 
-# Updating
-@docs updateBefore, update, updateAfter
+# Mapping
+@docs map, mapBefore, mapCurrent, mapAfter
 
 # Moving around
 @docs first, previous, next, last, find
@@ -72,23 +73,27 @@ after (Zipper _ _ rs) = rs
 toList : Zipper a -> List a
 toList z = before z ++ [current z] ++ after z
 
-{-| Update all elements before the element the `Zipper` is focussed on. -}
-updateBefore : (List a -> List a) -> Zipper a -> Zipper a
-updateBefore f ((Zipper _ x rs) as zipper) =
+{-| Apply a function to every element in the `Zipper`. -}
+map : (a -> b) -> Zipper a -> Zipper b
+map f (Zipper ls x rs) = Zipper (List.map f ls) (f x) (List.map f rs)
+
+{-| Apply a function to all elements before the element the `Zipper` is focussed on. -}
+mapBefore : (List a -> List a) -> Zipper a -> Zipper a
+mapBefore f ((Zipper _ x rs) as zipper) =
   let
     elementsBefore = before zipper
-    updatedElementsBefore = f elementsBefore
+    mappedElementsBefore = f elementsBefore
   in
-    Zipper (reverse updatedElementsBefore) x rs
+    Zipper (reverse mappedElementsBefore) x rs
     
-{-| Update the element the `Zipper` is focussed on. -}
-update : (a -> a) -> Zipper a -> Zipper a
-update f (Zipper ls x rs) = 
+{-| Apply a function to the element the `Zipper` is focussed on. -}
+mapCurrent : (a -> a) -> Zipper a -> Zipper a
+mapCurrent f (Zipper ls x rs) = 
   Zipper ls (f x) rs
   
-{-| Update all elements after the element the `Zipper` is focussed on. -}
-updateAfter : (List a -> List a) -> Zipper a -> Zipper a
-updateAfter f (Zipper ls x rs) =
+{-| Apply a function to all elements after the element the `Zipper` is focussed on. -}
+mapAfter : (List a -> List a) -> Zipper a -> Zipper a
+mapAfter f (Zipper ls x rs) =
   Zipper ls x (f rs)
   
 {-| Move the focus to the first element of the list. -}

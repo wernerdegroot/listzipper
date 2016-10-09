@@ -11,7 +11,7 @@ all =
     describe "List.Zipper"
         [ constructing
         , accessors
-        , updating
+        , mapping
         , moving
         ]
 
@@ -71,8 +71,8 @@ accessors =
         ]
 
 
-updating : Test
-updating =
+mapping : Test
+mapping =
     let
         negtive =
             (*) -1
@@ -80,23 +80,29 @@ updating =
         negtiveAll =
             List.map negtive
     in
-        describe "updating"
-            [ describe "#updateBefore"
-                [ fuzzZipper "should update all elements before the focussed element" <|
+        describe "mapping"
+            [ describe "#map"
+                [ fuzzZipper "should apply a function to all elements in the `Zipper`" <|
                     \z b f a ->
-                        updateBefore negtiveAll z
+                        List.Zipper.map negtive z
+                            |> expectZipper (negtiveAll b) (negtive f) (negtiveAll a)
+                ]
+            , describe "#mapBefore"
+                [ fuzzZipper "should apply a function to all elements before the focussed element" <|
+                    \z b f a ->
+                        List.Zipper.mapBefore negtiveAll z
                             |> expectZipper (negtiveAll b) f a
                 ]
-            , describe "#update"
-                [ fuzzZipper "should update the focussed element" <|
+            , describe "#mapCurrent"
+                [ fuzzZipper "should apply a function to the focussed element" <|
                     \z b f a ->
-                        update negtive z
+                        List.Zipper.mapCurrent negtive z
                             |> expectZipper b (negtive f) a
                 ]
-            , describe "#updateAfter"
-                [ fuzzZipper "should update all elements after the focussed element" <|
+            , describe "#mapAfter"
+                [ fuzzZipper "should apply a function to all elements after the focussed element" <|
                     \z b f a ->
-                        updateAfter negtiveAll z
+                        List.Zipper.mapAfter negtiveAll z
                             |> expectZipper b f (negtiveAll a)
                 ]
             ]
