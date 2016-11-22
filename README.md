@@ -12,10 +12,7 @@ We can use a `Zipper` to move around in an array, changing values as we go.
 
 ```elm
 import List.Zipper exposing (..)
-import Maybe exposing (andThen)
-
--- Just for convenience:
-flatMap = flip andThen
+import Maybe
 
 someList = [1, 2, 3, 4]
 
@@ -24,10 +21,10 @@ negative x = -x
 -- Just [1, 2, -3, 4]
 updatedList = someList
   |> fromList
-  |> flatMap next
-  |> flatMap next
-  |> map (update negative)
-  |> map toList
+  |> Maybe.andThen next
+  |> Maybe.andThen next
+  |> Maybe.map (mapCurrent negative)
+  |> Maybe.map toList
 ```
 
 ### Finding values
@@ -36,10 +33,7 @@ We can use a `Zipper` to find values, changing them as we see fit. This can be u
 
 ```elm
 import List.Zipper exposing (..)
-import Maybe exposing (andThen)
-
--- Just for convenience:
-flatMap = flip andThen
+import Maybe
 
 someList = [1, 2, 3, 4]
 
@@ -49,8 +43,8 @@ negative x = -x
 -- Just [1, -2, 3, 4]
 updatedList = someList
   |> fromList
-  |> flatMap (find even)
-  |> map (update negative)
-  |> map toList
+  |> Maybe.andThen (find even)
+  |> Maybe.map (mapCurrent negative)
+  |> Maybe.map toList
 
 ```
