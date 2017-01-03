@@ -16,6 +16,8 @@ module List.Zipper exposing
   , next
   , last
   , find
+  , findFirst
+  , findNext
   )
 
 {-| A zipper for `List`.
@@ -33,7 +35,7 @@ module List.Zipper exposing
 @docs map, mapBefore, mapCurrent, mapAfter
 
 # Moving around
-@docs first, previous, next, last, find
+@docs first, previous, next, last, find, findFirst, findNext
 
 -}
 
@@ -136,3 +138,15 @@ find predicate ((Zipper ls x rs) as zipper) =
         
       Nothing ->
         Nothing
+
+{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from the first element of a given `Zipper`).
+-}
+findFirst : (a -> Bool) -> Zipper a -> Maybe (Zipper a)
+findFirst predicate =
+  find predicate << first
+
+{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from the next element of a given `Zipper` if there is a next element).
+-}
+findNext : (a -> Bool) -> Zipper a -> Maybe (Zipper a)
+findNext predicate =
+  Maybe.andThen (find predicate) << next
