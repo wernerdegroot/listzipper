@@ -1,162 +1,197 @@
 module Tests exposing (..)
 
-import Expect
-import Fuzz exposing (..)
-import List.Zipper exposing (..)
 import Test exposing (..)
+import List.Zipper exposing (..)
+import Expect
+import Maybe exposing (andThen)
 
+assertJust : a -> Maybe a -> Expect.Expectation
+assertJust expectedValue possibleValue = 
+  case possibleValue of 
+    Just value -> Expect.equal expectedValue value
+    Nothing -> Expect.fail "Encountered `Nothing` where a value was expected!" 
 
-all : Test
-all =
-    describe "List.Zipper"
-        [ constructing
-        , accessors
-        , mapping
-        , moving
-        ]
+-- Test data:
+someList = [1, 2, 3, 4]
 
+focusOnThirdElement = someList
+  |> fromList 
+  |> andThen next 
+  |> andThen next
+  
+-- Tests:
+creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement =
+  let
+    zipper = singleton 1
+    valuesBefore = before zipper
+    valueAtFocus = current zipper
+    valuesAfter = after zipper
+  in
+    describe "Creating a singleton should result in a `Zipper` with only one element"
+      [ test "Elements before focus" <| \() -> Expect.equal [] valuesBefore
+      , test "Element at focus" <| \() -> Expect.equal 1 valueAtFocus
+      , test "Elements after focus" <| \() -> Expect.equal [] valuesAfter
+      ]
 
-constructing : Test
-constructing =
-    describe "Constructing a Zipper"
-        [ describe "#singleton"
-            [ fuzz int "should result in a zipper focussed on the only element" <|
-                \i ->
-                    expectZipper [] i [] <| singleton i
-            ]
-        , describe "#fromLIst"
-            [ fuzz (list int) "should maybe return a zipper" <|
-                \l ->
-                    case l of
-                        [] ->
-                            Expect.equal Nothing (fromList l)
+creatingAZipperFromAnEmptyListShouldReturnNothing =
+  let
+    zipperFromEmptyList = fromList []
+  in
+    test "Creating a `Zipper` from an empty list should return `Nothing`" <| \() -> Expect.equal Nothing zipperFromEmptyList
 
-                        head :: tail ->
-                            fromList l
-                                |> Expect.equal (Just (Zipper [] head tail))
-            ]
-        , describe "#withDefault"
-            [ test "should provide an alternative when constructing a Zipper fails" <|
-                \() ->
-                    fromList []
-                        |> withDefault 42
-                        |> expectZipper [] 42 []
-            ]
-        ]
+creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement =
+  let
+    zipper = fromList someList
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Creating a `Zipper` from a list should return a `Zipper` focussed on the first element"
+      [ test "Elements before focus" <| \() -> assertJust [] valuesBefore
+      , test "Element at focus" <| \() -> assertJust 1 valueAtFocus
+      , test "Elements after focus" <| \() -> assertJust [2, 3, 4] valuesAfter 
+      ]
 
+providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative =
+  let
+    zipper = fromList []
+    zipperOrAlternative = withDefault 1 zipper
+    valuesBefore = before zipperOrAlternative
+    valueAtFocus = current zipperOrAlternative
+    valuesAfter = after zipperOrAlternative
+  in
+    describe "Providing an alternative to a `Zipper` constructed from an empty list should yield a singleton with the provided alternative"
+      [ test "Elements before focus" <| \() -> Expect.equal [] valuesBefore
+      , test "Element at focus" <| \() -> Expect.equal 1 valueAtFocus
+      , test "Elements after focus" <| \() -> Expect.equal [] valuesAfter
+      ]
 
-accessors : Test
-accessors =
-    describe "Accessors"
-        [ describe "#before"
-            [ fuzzZipper "should return the elements before the focussed element" <|
-                \z b f a ->
-                    Expect.equal (List.reverse b) <| before z
-            ]
-        , describe "#current"
-            [ fuzzZipper "should return the focussed element" <|
-                \z b f a ->
-                    Expect.equal f <| current z
-            ]
-        , describe "#after"
-            [ fuzzZipper "should return the elements after the focussed element" <|
-                \z b f a ->
-                    Expect.equal a <| after z
-            ]
-        , describe "#toList"
-            [ fuzzZipper "should return a list of all elements" <|
-                \z b f a ->
-                    Expect.equal ((List.reverse b) ++ [ f ] ++ a) <| toList z
-            ]
-        ]
+providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList =
+  let
+    zipper = fromList someList
+    zipperOrAlternative = withDefault 1 zipper
+    valuesBefore = before zipperOrAlternative
+    valueAtFocus = current zipperOrAlternative
+    valuesAfter = after zipperOrAlternative
+  in
+    describe "Providing an alternative to a `Zipper` constructed from a valid list should yield a `Zipper` focussed on the first element of the list"
+      [ test "Elements before focus" <| \() -> Expect.equal [] valuesBefore
+      , test "Element at focus" <| \() -> Expect.equal 1 valueAtFocus
+      , test "Elements after focus" <| \() -> Expect.equal [2, 3, 4] valuesAfter 
+      ]
+      
+movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement =
+  let
+    zipper = Maybe.map first focusOnThirdElement
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Moving to the beginning of a list should return a `Zipper` focussed on the first element"
+      [ test "Elements before focus" <| \() -> assertJust [] valuesBefore
+      , test "Element at focus" <| \() -> assertJust 1 valueAtFocus
+      , test "Elements after focus" <| \() -> assertJust [2, 3, 4] valuesAfter 
+      ]
+      
+movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement =
+  let
+    zipper = andThen previous focusOnThirdElement
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Moving a `Zipper` focussed on the third element backward should return a `Zipper` focussed on the second element" 
+      [ test "Elements before focus" <| \() -> assertJust [1] valuesBefore
+      , test "Element at focus" <| \() -> assertJust 2 valueAtFocus
+      , test "Elements after focus" <| \() -> assertJust [3, 4] valuesAfter
+      ] 
+    
+movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement =
+  let
+    zipper = andThen next focusOnThirdElement
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Moving a `Zipper` focussed on the third element forward should return a `Zipper` focussed on the fourth element"
+      [ test "Elements before focus" <| \() -> assertJust [1, 2, 3] valuesBefore
+      , test "Element at focus" <| \() -> assertJust 4 valueAtFocus
+      , test "Elements after focus" <| \() -> assertJust [] valuesAfter
+      ] 
+      
+movingToTheEndOfAListShouldReturnAZipperFocussedOnTheLastElement =
+  let
+    zipper = Maybe.map last focusOnThirdElement
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Moving to the end of a list should return a `Zipper` focussed on the last element"
+      [ test "before" <| \() -> assertJust [1, 2, 3] valuesBefore
+      , test "at" <| \() -> assertJust 4 valueAtFocus
+      , test "after" <| \() -> assertJust [] valuesAfter 
+      ]
+      
+updatingTheValuesBeforeTheFocusShouldWorkAsExpected =
+  let
+    transformation = always [8, 9]
+    updatedZipper = Maybe.map (mapBefore transformation) focusOnThirdElement
+    updatedList = Maybe.map toList updatedZipper
+  in
+    test "Updating the values before the focus should work as expected" <| \() -> (assertJust [8, 9, 3, 4] updatedList)
+    
+updatingTheValueAtTheFocusShouldWorkAsExpected =
+  let
+    transformation = always 7
+    updatedZipper = Maybe.map (mapCurrent transformation) focusOnThirdElement
+    updatedList = Maybe.map toList updatedZipper
+  in
+    test "Updating the values before the focus should work as expected" <| \() -> (assertJust [1, 2, 7, 4] updatedList)
+    
+updatingTheValuesAfterTheFocusShouldWorkAsExpected =
+  let
+    transformation = always [5, 6, 7]
+    updatedZipper = Maybe.map (mapAfter transformation) focusOnThirdElement
+    updatedList = Maybe.map toList updatedZipper
+  in
+    test "Updating the values before the focus should work as expected" <| \() -> (assertJust [1, 2, 3, 5, 6, 7] updatedList)
+    
+searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree =
+  let
+    findThree = find (\x -> x == 3)
+    startingPoint = fromList someList
+    zipper = andThen findThree startingPoint
+    valuesBefore = Maybe.map before zipper
+    valueAtFocus = Maybe.map current zipper
+    valuesAfter = Maybe.map after zipper
+  in
+    describe "Searching for the number 3 should yield a `Zipper` focussed on the first element with value 3"
+      [ test "before" <| \() -> assertJust [1, 2] valuesBefore
+      , test "at" <| \() -> assertJust 3 valueAtFocus
+      , test "after" <| \() -> assertJust [4] valuesAfter 
+      ]
+      
+searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint =
+  let
+    findOne = find (\x -> x == 1)
+    startingPoint = fromList someList |> andThen next
+    zipper = andThen findOne startingPoint
+  in
+    test "Searching for the number 1 should yield `Nothing` when the number 1 does not occur after the starting point" <| \() -> Expect.equal Nothing zipper
 
-
-mapping : Test
-mapping =
-    let
-        negtive =
-            (*) -1
-
-        negtiveAll =
-            List.map negtive
-    in
-        describe "mapping"
-            [ describe "#map"
-                [ fuzzZipper "should apply a function to all elements in the `Zipper`" <|
-                    \z b f a ->
-                        List.Zipper.map negtive z
-                            |> expectZipper (negtiveAll b) (negtive f) (negtiveAll a)
-                ]
-            , describe "#mapBefore"
-                [ fuzzZipper "should apply a function to all elements before the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapBefore negtiveAll z
-                            |> expectZipper (negtiveAll b) f a
-                ]
-            , describe "#mapCurrent"
-                [ fuzzZipper "should apply a function to the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapCurrent negtive z
-                            |> expectZipper b (negtive f) a
-                ]
-            , describe "#mapAfter"
-                [ fuzzZipper "should apply a function to all elements after the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapAfter negtiveAll z
-                            |> expectZipper b f (negtiveAll a)
-                ]
-            ]
-
-
-moving : Test
-moving =
-    describe "moving"
-        [ describe "#next"
-            [ fuzzZipper "should set the focus to the next item" <|
-                \z b f a ->
-                    next z
-                        |> Maybe.map current
-                        |> Expect.equal (List.head a)
-            ]
-        , describe "#previous"
-            [ fuzzZipper "should set the focus to the previous item" <|
-                \z b f a ->
-                    previous z
-                        |> Maybe.map current
-                        |> Expect.equal (List.head b)
-            ]
-        , describe "#first"
-            [ fuzzZipper "should set the focus to the first item" <|
-                \z b f a ->
-                    if List.isEmpty b then
-                        Expect.equal f <| current <| first z
-                    else
-                        first z
-                            |> current
-                            |> Just
-                            |> Expect.equal (List.head <| List.reverse b)
-            ]
-        , describe "#last"
-            [ fuzzZipper "should set the focus to the last item" <|
-                \z b f a ->
-                    if List.isEmpty a then
-                        Expect.equal f <| current <| last z
-                    else
-                        last z
-                            |> current
-                            |> Just
-                            |> Expect.equal (List.head <| List.reverse a)
-            ]
-        ]
-
-
-expectZipper : List a -> a -> List a -> Zipper a -> Expect.Expectation
-expectZipper b f a z =
-    Zipper b f a
-        |> Expect.equal z
-
-
-fuzzZipper : String -> (Zipper Int -> List Int -> Int -> List Int -> Expect.Expectation) -> Test
-fuzzZipper title expectation =
-    fuzz3 (list int) int (list int) title <|
-        \b f a -> expectation (Zipper b f a) b f a
+all = describe "List.Zipper" 
+  [ creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement
+  , creatingAZipperFromAnEmptyListShouldReturnNothing
+  , creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement
+  , providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative
+  , providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList 
+  , movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement
+  , movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement
+  , movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement
+  , movingToTheEndOfAListShouldReturnAZipperFocussedOnTheLastElement
+  , updatingTheValuesBeforeTheFocusShouldWorkAsExpected
+  , updatingTheValueAtTheFocusShouldWorkAsExpected
+  , updatingTheValuesAfterTheFocusShouldWorkAsExpected
+  , searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree
+  , searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint
+  ]
