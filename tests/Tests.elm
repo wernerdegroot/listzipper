@@ -4,6 +4,7 @@ import Test exposing (..)
 import List.Zipper exposing (..)
 import Expect
 import Maybe exposing (andThen)
+import Lazy.List as LazyList
 
 assertJust : a -> Maybe a -> Expect.Expectation
 assertJust expectedValue possibleValue = 
@@ -179,6 +180,25 @@ searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheSt
   in
     test "Searching for the number 1 should yield `Nothing` when the number 1 does not occur after the starting point" <| \() -> Expect.equal Nothing zipper
 
+searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYieldAllPositiveNumbers =
+  let
+    isJust m = case m of
+      Just _ -> True
+      Nothing -> False
+    listToSearchIn = [1, -4, -2, 3, -8, 6, 3]
+    predicate = \x -> x > 0
+    generator = Maybe.andThen (findNext predicate)
+    positives = fromList listToSearchIn
+      |> Maybe.andThen (find predicate) -- Finds the first positive
+      |> LazyList.iterate generator -- Finds all other positives
+      |> LazyList.map (Maybe.map current) -- Maps `Zipper` to its current item
+      |> LazyList.takeWhile isJust -- Takes until we've passed the last positive
+      |> LazyList.toList -- Transforms to a `List`
+  in
+    test "Searching for the positive numbers in a list with both positive and negative numbers should yield all positive numbers" 
+      <| \() -> Expect.equal [Just 1, Just 3, Just 6, Just 3] positives
+     
+
 all = describe "List.Zipper" 
   [ creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement
   , creatingAZipperFromAnEmptyListShouldReturnNothing
@@ -194,4 +214,5 @@ all = describe "List.Zipper"
   , updatingTheValuesAfterTheFocusShouldWorkAsExpected
   , searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree
   , searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint
+  , searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYieldAllPositiveNumbers
   ]
