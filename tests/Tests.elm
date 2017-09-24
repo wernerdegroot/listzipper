@@ -147,7 +147,7 @@ updatingTheValueAtTheFocusShouldWorkAsExpected =
     updatedZipper = Maybe.map (mapCurrent transformation) focusOnThirdElement
     updatedList = Maybe.map toList updatedZipper
   in
-    test "Updating the values before the focus should work as expected" <| \() -> (assertJust [1, 2, 7, 4] updatedList)
+    test "Updating the values at the focus should work as expected" <| \() -> (assertJust [1, 2, 7, 4] updatedList)
     
 updatingTheValuesAfterTheFocusShouldWorkAsExpected =
   let
@@ -155,7 +155,7 @@ updatingTheValuesAfterTheFocusShouldWorkAsExpected =
     updatedZipper = Maybe.map (mapAfter transformation) focusOnThirdElement
     updatedList = Maybe.map toList updatedZipper
   in
-    test "Updating the values before the focus should work as expected" <| \() -> (assertJust [1, 2, 3, 5, 6, 7] updatedList)
+    test "Updating the values after the focus should work as expected" <| \() -> (assertJust [1, 2, 3, 5, 6, 7] updatedList)
     
 searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree =
   let
