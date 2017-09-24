@@ -1,4 +1,4 @@
-# ListZipper
+# ListZipper [![Build Status](https://travis-ci.org/wernerdegroot/listzipper.svg?branch=master)](https://travis-ci.org/wernerdegroot/listzipper)
 
 A zipper for `List`.
 
