@@ -126,7 +126,7 @@ last ((Zipper ls x rs) as zipper) =
     [] -> zipper
     y :: ys -> Zipper (ys ++ [x] ++ ls) y [] 
     
-{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from a given `Zipper`). -}
+{-| Returns a `Zipper` focussed on the first element for which the predicate returns `True` (starting from a given `Zipper`). Note that this function does not search the entire list, but starts searching from the current element. -}
 find : (a -> Bool) -> Zipper a -> Maybe (Zipper a)
 find predicate ((Zipper ls x rs) as zipper) =
   if predicate x then
