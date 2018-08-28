@@ -11,7 +11,9 @@ cache:
 os:
   - linux
 
-env: ELM_VERSION=0.18.0
+env: 
+  - ELM_VERSION=0.19.0 
+  - ELM_TEST_VERSION=0.19.0-beta4
 
 before_install:
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
@@ -19,7 +21,7 @@ before_install:
 install:
   - node --version
   - npm --version
-  - npm install -g elm@$ELM_VERSION elm-test
+  - npm install -g elm@$ELM_VERSION elm-test@$ELM_TEST_VERSION
   - git clone https://github.com/NoRedInk/elm-ops-tooling
   - elm-ops-tooling/with_retry.rb elm package install --yes
   # Faster compile on Travis.
