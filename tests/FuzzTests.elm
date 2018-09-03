@@ -1,4 +1,4 @@
-module FuzzTests exposing (..)
+module FuzzTests exposing (accessors, all, constructing, expectZipper, fuzzZipper, mapping, moving)
 
 import Expect
 import Fuzz exposing (..)

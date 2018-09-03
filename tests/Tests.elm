@@ -1,10 +1,10 @@
-module Tests exposing (..)
+module Tests exposing (all, assertJust, creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement, creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement, creatingAZipperFromAnEmptyListShouldReturnNothing, focusOnThirdElement, movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement, movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement, movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement, movingToTheEndOfAListShouldReturnAZipperFocussedOnTheLastElement, providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList, providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative, searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint, searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree, searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYieldAllPositiveNumbers, someList, updatingTheValueAtTheFocusShouldWorkAsExpected, updatingTheValuesAfterTheFocusShouldWorkAsExpected, updatingTheValuesBeforeTheFocusShouldWorkAsExpected)
 
 import Test exposing (..)
 import List.Zipper exposing (..)
 import Expect
 import Maybe exposing (andThen)
-import Lazy.List as LazyList
+import List.Extra as ListExtra
 
 assertJust : a -> Maybe a -> Expect.Expectation
 assertJust expectedValue possibleValue = 
@@ -187,16 +187,15 @@ searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYie
       Nothing -> False
     listToSearchIn = [1, -4, -2, 3, -8, 6, 3]
     predicate = \x -> x > 0
-    generator = Maybe.andThen (findNext predicate)
+    generator = findNext predicate
     positives = fromList listToSearchIn
       |> Maybe.andThen (find predicate) -- Finds the first positive
-      |> LazyList.iterate generator -- Finds all other positives
-      |> LazyList.map (Maybe.map current) -- Maps `Zipper` to its current item
-      |> LazyList.takeWhile isJust -- Takes until we've passed the last positive
-      |> LazyList.toList -- Transforms to a `List`
+      |> Maybe.map (ListExtra.iterate generator) -- Finds all other positives
+      |> Maybe.map (List.map current) -- Maps `Zipper` to its current item
+      |> Maybe.withDefault [] -- Extracts the list
   in
     test "Searching for the positive numbers in a list with both positive and negative numbers should yield all positive numbers" 
-      <| \() -> Expect.equal [Just 1, Just 3, Just 6, Just 3] positives
+      <| \() -> Expect.equal [1, 3, 6, 3] positives
      
 
 all = describe "List.Zipper" 
