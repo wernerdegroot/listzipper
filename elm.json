@@ -3,7 +3,7 @@
     "name": "wernerdegroot/listzipper",
     "summary": "A zipper for List",
     "license": "MIT",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "exposed-modules": [
         "List.Zipper"
     ],
@@ -13,7 +13,7 @@
     },
     "test-dependencies": {
         "elm/time": "1.0.0 <= v < 2.0.0",
-        "elm-explorations/test": "1.0.0 <= v < 2.0.0",
-        "elm-community/list-extra": "8.0.0 <= v < 9.0.0"
+        "elm-community/list-extra": "8.0.0 <= v < 9.0.0",
+        "elm-explorations/test": "1.0.0 <= v < 2.0.0"
     }
 }
