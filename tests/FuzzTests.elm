@@ -13,6 +13,7 @@ all =
         , accessors
         , mapping
         , moving
+        , predicates
         ]
 
 
@@ -66,7 +67,7 @@ accessors =
         , describe "#toList"
             [ fuzzZipper "should return a list of all elements" <|
                 \z b f a ->
-                    Expect.equal ((List.reverse b) ++ [ f ] ++ a) <| toList z
+                    Expect.equal (List.reverse b ++ [ f ] ++ a) <| toList z
             ]
         ]
 
@@ -80,32 +81,32 @@ mapping =
         negtiveAll =
             List.map negtive
     in
-        describe "mapping"
-            [ describe "#map"
-                [ fuzzZipper "should apply a function to all elements in the `Zipper`" <|
-                    \z b f a ->
-                        List.Zipper.map negtive z
-                            |> expectZipper (negtiveAll b) (negtive f) (negtiveAll a)
-                ]
-            , describe "#mapBefore"
-                [ fuzzZipper "should apply a function to all elements before the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapBefore negtiveAll z
-                            |> expectZipper (negtiveAll b) f a
-                ]
-            , describe "#mapCurrent"
-                [ fuzzZipper "should apply a function to the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapCurrent negtive z
-                            |> expectZipper b (negtive f) a
-                ]
-            , describe "#mapAfter"
-                [ fuzzZipper "should apply a function to all elements after the focussed element" <|
-                    \z b f a ->
-                        List.Zipper.mapAfter negtiveAll z
-                            |> expectZipper b f (negtiveAll a)
-                ]
+    describe "mapping"
+        [ describe "#map"
+            [ fuzzZipper "should apply a function to all elements in the `Zipper`" <|
+                \z b f a ->
+                    List.Zipper.map negtive z
+                        |> expectZipper (negtiveAll b) (negtive f) (negtiveAll a)
             ]
+        , describe "#mapBefore"
+            [ fuzzZipper "should apply a function to all elements before the focussed element" <|
+                \z b f a ->
+                    List.Zipper.mapBefore negtiveAll z
+                        |> expectZipper (negtiveAll b) f a
+            ]
+        , describe "#mapCurrent"
+            [ fuzzZipper "should apply a function to the focussed element" <|
+                \z b f a ->
+                    List.Zipper.mapCurrent negtive z
+                        |> expectZipper b (negtive f) a
+            ]
+        , describe "#mapAfter"
+            [ fuzzZipper "should apply a function to all elements after the focussed element" <|
+                \z b f a ->
+                    List.Zipper.mapAfter negtiveAll z
+                        |> expectZipper b f (negtiveAll a)
+            ]
+        ]
 
 
 moving : Test
@@ -130,6 +131,7 @@ moving =
                 \z b f a ->
                     if List.isEmpty b then
                         Expect.equal f <| current <| first z
+
                     else
                         first z
                             |> current
@@ -141,11 +143,58 @@ moving =
                 \z b f a ->
                     if List.isEmpty a then
                         Expect.equal f <| current <| last z
+
                     else
                         last z
                             |> current
                             |> Just
                             |> Expect.equal (List.head <| List.reverse a)
+            ]
+        ]
+
+
+predicates : Test
+predicates =
+    describe "predicates"
+        [ describe "#isFirst"
+            [ fuzzZipper "should be always true for a zipper focused on the first element" <|
+                \z b f a ->
+                    first z
+                        |> isFirst
+                        |> Expect.true "should be always true for a zipper focused on the first element"
+            , fuzz int "should be always true for a singleton zipper" <|
+                \value ->
+                    singleton value
+                        |> isFirst
+                        |> Expect.true "should be always true for a singleton zipper"
+            , fuzzZipper "should be always false for a zipper not focused on the first element" <|
+                \z b f a ->
+                    if not (List.isEmpty b) then
+                        isFirst z
+                            |> Expect.false "should be always false for a zipper not focused on the first element"
+
+                    else
+                        Expect.pass
+            ]
+        , describe "#isLast"
+            [ fuzzZipper "should be always true for a zipper focused on the last element" <|
+                \z b f a ->
+                    last z
+                        |> isLast
+                        |> Expect.true "should be always true for a zipper focused on the last element"
+            , fuzz int "should be always true for a singleton zipper" <|
+                \value ->
+                    singleton value
+                        |> isLast
+                        |> Expect.true "should be always true for a singleton zipper"
+            , fuzzZipper "should be always false for a zipper not focused on the last element" <|
+                \z b f a ->
+                    if not (List.isEmpty a) then
+                        isLast z
+                            |> Expect.false "should be always false for a zipper not focused on the last element"
+
+                    else
+                        Expect.pass
             ]
         ]
 
