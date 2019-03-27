@@ -1,6 +1,6 @@
 module List.Zipper exposing
     ( Zipper
-    , singleton, fromList, withDefault, fromCons, from
+    , singleton, fromList, fromCons, from, withDefault
     , before, current, after, toList
     , map, mapBefore, mapCurrent, mapAfter
     , first, previous, next, last, find, findFirst, findNext
@@ -17,7 +17,7 @@ module List.Zipper exposing
 
 # Constructing a `Zipper`
 
-@docs singleton, fromList, withDefault, fromCons, from
+@docs singleton, fromList, fromCons, from, withDefault
 
 
 # Accessors
