@@ -34,7 +34,7 @@ constructing =
 
                         head :: tail ->
                             fromList l
-                                |> Expect.equal (Just (Zipper [] head tail))
+                                |> Expect.equal (Just (from [] head tail))
             ]
         , describe "#withDefault"
             [ test "should provide an alternative when constructing a Zipper fails" <|
@@ -201,11 +201,11 @@ predicates =
 
 expectZipper : List a -> a -> List a -> Zipper a -> Expect.Expectation
 expectZipper b f a z =
-    Zipper b f a
+    from (List.reverse b) f a
         |> Expect.equal z
 
 
 fuzzZipper : String -> (Zipper Int -> List Int -> Int -> List Int -> Expect.Expectation) -> Test
 fuzzZipper title expectation =
     fuzz3 (list int) int (list int) title <|
-        \b f a -> expectation (Zipper b f a) b f a
+        \b f a -> expectation (from (List.reverse b) f a) b f a
