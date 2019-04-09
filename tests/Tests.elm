@@ -1,4 +1,4 @@
-module Tests exposing (all, assertJust, creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement, creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement, creatingAZipperFromAnEmptyListShouldReturnNothing, focusOnThirdElement, movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement, movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement, movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement, movingToTheEndOfAListShouldReturnAZipperFocussedOnTheLastElement, providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList, providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative, searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint, searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree, searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYieldAllPositiveNumbers, someList, updatingTheValueAtTheFocusShouldWorkAsExpected, updatingTheValuesAfterTheFocusShouldWorkAsExpected, updatingTheValuesBeforeTheFocusShouldWorkAsExpected)
+module Tests exposing (all, assertJust, creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement, creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement, creatingAZipperFromConsShouldReturnAZipperFocusedOnHeadElement, creatingAZipperFromListElementListShouldReturnAZipperWithThoseElements, creatingAZipperFromAnEmptyListShouldReturnNothing, focusOnThirdElement, movingAZipperFocussedOnTheThirdElementBackwardShouldReturnAZipperFocussedOnTheSecondElement, movingAZipperFocussedOnTheThirdElementForwardShouldReturnAZipperFocussedOnTheFourthElement, movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement, movingToTheEndOfAListShouldReturnAZipperFocussedOnTheLastElement, providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList, providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative, searchingForTheNumberOneShouldYieldNothingWhenTheNumberOneDoesNotOccurAfterTheStartingPoint, searchingForTheNumberThreeShouldYieldAZipperFocussedOnTheFirstElementWithTheValueThree, searchingForThePositiveNumbersInAListWithBothPositiveAndNegativeNumbersShouldYieldAllPositiveNumbers, someList, updatingTheValueAtTheFocusShouldWorkAsExpected, updatingTheValuesAfterTheFocusShouldWorkAsExpected, updatingTheValuesBeforeTheFocusShouldWorkAsExpected)
 
 import Test exposing (..)
 import List.Zipper exposing (..)
@@ -51,6 +51,35 @@ creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement =
       [ test "Elements before focus" <| \() -> assertJust [] valuesBefore
       , test "Element at focus" <| \() -> assertJust 1 valueAtFocus
       , test "Elements after focus" <| \() -> assertJust [2, 3, 4] valuesAfter 
+      ]
+
+creatingAZipperFromConsShouldReturnAZipperFocusedOnHeadElement =
+  let
+    zipper = fromCons 5 someList
+    valuesBefore = before zipper
+    valueAtFocus = current zipper
+    valuesAfter = after zipper
+  in
+    describe "Creating a `Zipper` from a cons (head & tail) should return a `Zipper` focused on the head, with the tail list as after"
+      [ test "Elements before focus" <| \() -> Expect.equal [] valuesBefore
+      , test "Element at focus" <| \() -> Expect.equal 5 valueAtFocus
+      , test "Elements after focus" <| \() -> Expect.equal someList valuesAfter
+      ]
+
+creatingAZipperFromListElementListShouldReturnAZipperWithThoseElements =
+  let
+    beforeList = [1,2,3,4]
+    focusedValue = 5
+    afterList = [6,7,8,9]
+    zipper = from beforeList focusedValue afterList
+    valuesBefore = before zipper
+    valueAtFocus = current zipper
+    valuesAfter = after zipper
+  in
+    describe "Creating a `Zipper` from before, element, and after should return a `Zipper` with those elements"
+      [ test "Elements before focus" <| \() -> Expect.equal beforeList valuesBefore
+      , test "Element at focus" <| \() -> Expect.equal focusedValue valueAtFocus
+      , test "Elements after focus" <| \() -> Expect.equal afterList valuesAfter
       ]
 
 providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative =
