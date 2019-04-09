@@ -76,7 +76,7 @@ fromCons x xs =
     Zipper [] x xs
 
 
-{-| Construct a `Zipper` from before, current, after.
+{-| Construct a `Zipper` from before, current, after. The order is preserved, so `(from [1,2,3] 4 [5,6] |> toList) == [1,2,3,4,5,6]`.
 -}
 from : List a -> a -> List a -> Zipper a
 from bef curr aft =
