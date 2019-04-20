@@ -1,6 +1,6 @@
 module List.Zipper exposing
-    ( Zipper(..)
-    , singleton, fromList, withDefault
+    ( Zipper
+    , singleton, fromList, fromCons, from, withDefault
     , before, current, after, toList
     , map, mapBefore, mapCurrent, mapAfter
     , first, previous, next, last, find, findFirst, findNext
@@ -17,7 +17,7 @@ module List.Zipper exposing
 
 # Constructing a `Zipper`
 
-@docs singleton, fromList, withDefault
+@docs singleton, fromList, fromCons, from, withDefault
 
 
 # Accessors
@@ -67,6 +67,20 @@ fromList xs =
 
         y :: ys ->
             Just (Zipper [] y ys)
+
+
+{-| Construct a `Zipper` from the first element and a list. The `Zipper` will focus on the first element.
+-}
+fromCons : a -> List a -> Zipper a
+fromCons x xs =
+    Zipper [] x xs
+
+
+{-| Construct a `Zipper` from before, current, after. The order is preserved, so `(from [1,2,3] 4 [5,6] |> toList) == [1,2,3,4,5,6]`.
+-}
+from : List a -> a -> List a -> Zipper a
+from bef curr aft =
+    Zipper (reverse bef) curr aft
 
 
 {-| Provide an alternative when constructing a `Zipper` fails.
