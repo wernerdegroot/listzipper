@@ -5,7 +5,7 @@ language: node_js
 node_js: node
 
 install:
-  - npm install -g elm@0.19.0-bugfix2 elm-test@0.19.0-beta4 
+  - npm install -g elm@0.19.0-no-deps elm-test@0.19.0-rev6 
 
 script:
   # Lib
