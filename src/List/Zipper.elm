@@ -2,7 +2,7 @@ module List.Zipper exposing
     ( Zipper
     , singleton, fromList, fromCons, from, withDefault
     , before, current, after, toList
-    , map, mapBefore, mapCurrent, mapAfter
+    , map, mapBefore, mapCurrent, mapAfter, mapAll
     , first, previous, next, last, find, findFirst, findNext
     , isLast, isFirst
     )
@@ -27,7 +27,7 @@ module List.Zipper exposing
 
 # Mapping
 
-@docs map, mapBefore, mapCurrent, mapAfter
+@docs map, mapBefore, mapCurrent, mapAfter, mapAll
 
 
 # Moving around
@@ -151,6 +151,16 @@ mapCurrent f (Zipper ls x rs) =
 mapAfter : (List a -> List a) -> Zipper a -> Zipper a
 mapAfter f (Zipper ls x rs) =
     Zipper ls x (f rs)
+
+
+{-| Apply a function to the focussed element and another function to elements without focus.
+-}
+mapAll : { mapCurrent : a -> b, mapBefore : a -> b, mapAfter : a -> b } -> Zipper a -> Zipper b
+mapAll fs (Zipper ls x rs) =
+    Zipper
+        (List.map fs.mapBefore ls)
+        (fs.mapCurrent x)
+        (List.map fs.mapAfter rs)
 
 
 {-| Move the focus to the first element of the list.

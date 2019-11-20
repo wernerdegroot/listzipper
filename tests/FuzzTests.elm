@@ -75,36 +75,58 @@ accessors =
 mapping : Test
 mapping =
     let
-        negtive =
+        negate =
             (*) -1
 
-        negtiveAll =
-            List.map negtive
+        negateAll =
+            List.map negate
     in
     describe "mapping"
         [ describe "#map"
             [ fuzzZipper "should apply a function to all elements in the `Zipper`" <|
                 \z b f a ->
-                    List.Zipper.map negtive z
-                        |> expectZipper (negtiveAll b) (negtive f) (negtiveAll a)
+                    List.Zipper.map negate z
+                        |> expectZipper (negateAll b) (negate f) (negateAll a)
             ]
         , describe "#mapBefore"
             [ fuzzZipper "should apply a function to all elements before the focussed element" <|
                 \z b f a ->
-                    List.Zipper.mapBefore negtiveAll z
-                        |> expectZipper (negtiveAll b) f a
+                    List.Zipper.mapBefore negateAll z
+                        |> expectZipper (negateAll b) f a
             ]
         , describe "#mapCurrent"
             [ fuzzZipper "should apply a function to the focussed element" <|
                 \z b f a ->
-                    List.Zipper.mapCurrent negtive z
-                        |> expectZipper b (negtive f) a
+                    List.Zipper.mapCurrent negate z
+                        |> expectZipper b (negate f) a
             ]
         , describe "#mapAfter"
             [ fuzzZipper "should apply a function to all elements after the focussed element" <|
                 \z b f a ->
-                    List.Zipper.mapAfter negtiveAll z
-                        |> expectZipper b f (negtiveAll a)
+                    List.Zipper.mapAfter negateAll z
+                        |> expectZipper b f (negateAll a)
+            ]
+        , describe "#mapAll"
+            [ fuzzZipper "should have behave like `map` with identical map functions" <|
+                \z b f a ->
+                    List.Zipper.mapAll { mapCurrent = negate, mapBefore = negate, mapAfter = negate } z
+                        |> Expect.equal (List.Zipper.map negate z)
+            , fuzzZipper "should have behave like `mapAfter` if only `mapAfter` is set" <|
+                \z b f a ->
+                    List.Zipper.mapAll { mapCurrent = identity, mapBefore = identity, mapAfter = negate } z
+                        |> Expect.equal (List.Zipper.mapAfter (List.map negate) z)
+            , fuzzZipper "should have behave like `mapBefore` if only `mapBefore` is set" <|
+                \z b f a ->
+                    List.Zipper.mapAll { mapCurrent = identity, mapAfter = identity, mapBefore = negate } z
+                        |> Expect.equal (List.Zipper.mapBefore (List.map negate) z)
+            , fuzzZipper "should have behave like `mapCurrent` if only `mapCurrent` is set" <|
+                \z b f a ->
+                    List.Zipper.mapAll { mapCurrent = negate, mapAfter = identity, mapBefore = identity } z
+                        |> Expect.equal (List.Zipper.mapCurrent negate z)
+            , fuzzZipper "should have behave like `mapBefore` and `mapAfter` if `mapCurrent` is `identity`" <|
+                \z b f a ->
+                    List.Zipper.mapAll { mapCurrent = identity, mapAfter = negate, mapBefore = negate } z
+                        |> Expect.equal (z |> List.Zipper.mapBefore negateAll |> List.Zipper.mapAfter negateAll)
             ]
         ]
 
