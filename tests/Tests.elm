@@ -82,6 +82,23 @@ creatingAZipperFromListElementListShouldReturnAZipperWithThoseElements =
       , test "Elements after focus" <| \() -> Expect.equal afterList valuesAfter
       ]
 
+creatingZippersFromAllItemsShouldWorkAsExpected =
+    let
+        input =
+            [ 1, 2, 3, 4 ]
+
+        expectedOutput =
+            [ from [] 1 [ 2, 3, 4 ]
+            , from [ 1 ] 2 [ 3, 4 ]
+            , from [ 1, 2 ] 3 [ 4 ]
+            , from [ 1, 2, 3 ] 4 []
+            ]
+    in
+    test "Creating zippers from all items should behave as expected" <|
+        \() ->
+            openAll input
+                |> Expect.equal expectedOutput
+
 providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative =
   let
     zipper = fromList []
@@ -231,6 +248,7 @@ all = describe "List.Zipper"
   [ creatingASingletonShouldResultInAZipperFocussedOnTheOnlyElement
   , creatingAZipperFromAnEmptyListShouldReturnNothing
   , creatingAZipperFromAListShouldReturnAZipperFocussedOnTheFirstElement
+  , creatingZippersFromAllItemsShouldWorkAsExpected
   , providingAnAlternativeToAZipperConstructedFromAnEmptyListShouldYieldASingletonWithTheProvidedAlternative
   , providingAnAlternativeToAZipperConstructedFromAValidListShouldYieldAZipperFocussedOnTheFirstElementOfTheList 
   , movingToTheBeginningOfAListShouldReturnAZipperFocussedOnTheFirstElement

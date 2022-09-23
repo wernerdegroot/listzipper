@@ -8,7 +8,7 @@ import Test exposing (..)
 
 all : Test
 all =
-    describe "List.Zipper"
+    describe "List.Zipper fuzz tests"
         [ constructing
         , accessors
         , mapping
@@ -25,7 +25,7 @@ constructing =
                 \i ->
                     expectZipper [] i [] <| singleton i
             ]
-        , describe "#fromLIst"
+        , describe "#fromList"
             [ fuzz (list int) "should maybe return a zipper" <|
                 \l ->
                     case l of
@@ -42,6 +42,18 @@ constructing =
                     fromList []
                         |> withDefault 42
                         |> expectZipper [] 42 []
+            ]
+        , describe "#openAll"
+            [ fuzz (list int) "should focus on each element in the input (exactly once, in order)" <|
+                \l ->
+                    openAll l
+                        |> List.map (before >> List.length)
+                        |> Expect.equal (List.range 0 (List.length l - 1))
+            , fuzz (list int) "should not change the contents" <|
+                \l ->
+                    openAll l
+                        |> List.map toList
+                        |> Expect.equal (List.repeat (List.length l) l)
             ]
         ]
 
