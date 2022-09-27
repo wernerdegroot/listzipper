@@ -257,11 +257,19 @@ isLast (Zipper _ _ rs) =
 -}
 openAll : List a -> List (Zipper a)
 openAll input =
-    List.indexedMap
-        (\i x ->
-            from
-                (List.take i input)
-                x
-                (List.drop (i + 1) input)
-        )
-        input
+    let
+        go : Zipper a -> List (Zipper a) -> List (Zipper a)
+        go accZipper accOutput =
+            case next accZipper of
+                Nothing ->
+                    List.reverse (accZipper :: accOutput)
+
+                Just nextZipper ->
+                    go nextZipper (accZipper :: accOutput)
+    in
+    case input of
+        [] ->
+            []
+
+        x :: xs ->
+            go (fromCons x xs) []
