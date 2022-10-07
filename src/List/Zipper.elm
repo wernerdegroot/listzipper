@@ -1,6 +1,6 @@
 module List.Zipper exposing
     ( Zipper
-    , singleton, fromList, fromCons, from, withDefault
+    , singleton, fromList, fromCons, from, withDefault, openAll
     , before, current, after, toList
     , map, mapBefore, mapCurrent, mapAfter
     , first, previous, next, last, find, findFirst, findNext
@@ -17,7 +17,7 @@ module List.Zipper exposing
 
 # Constructing a `Zipper`
 
-@docs singleton, fromList, fromCons, from, withDefault
+@docs singleton, fromList, fromCons, from, withDefault, openAll
 
 
 # Accessors
@@ -243,3 +243,33 @@ isFirst (Zipper ls _ _) =
 isLast : Zipper a -> Bool
 isLast (Zipper _ _ rs) =
     List.isEmpty rs
+
+
+{-| Make zippers focused at every element of the input list:
+
+    openAll [1,2,3]
+    -->
+    [ [<1>, 2, 3]
+    , [1, <2>, 3]
+    , [1, 2, <3>]
+    ]
+
+-}
+openAll : List a -> List (Zipper a)
+openAll input =
+    let
+        go : Zipper a -> List (Zipper a) -> List (Zipper a)
+        go accZipper accOutput =
+            case next accZipper of
+                Nothing ->
+                    List.reverse (accZipper :: accOutput)
+
+                Just nextZipper ->
+                    go nextZipper (accZipper :: accOutput)
+    in
+    case input of
+        [] ->
+            []
+
+        x :: xs ->
+            go (fromCons x xs) []
